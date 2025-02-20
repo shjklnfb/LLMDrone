@@ -1,0 +1,2 @@
+2025-01-11 13:18:40 - root - INFO - 执行指令: command_takeoff 参数: {'x': 0, 'y': 0, 'z': 5} 无人机: drone1
+2025-01-11 13:20:20 - root - INFO - 执行指令: command_takeoff 参数: {'x': 0, 'y': 0, 'z': 5} 无人机: drone1

@@ -1,0 +1,5 @@
+1. 测试多无人机全流程（除TaskAssigner、Initializer和步骤检验外），根据问题完善功能
+2. LLM步骤执行效果检查并再次发布指令功能
+3. 完成突发任务处理功能，并测试
+4. 优化提示词
+5. TaskAssigner和Initializer

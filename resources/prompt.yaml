@@ -1,0 +1,163 @@
+# 这个文件是用来存放提示词的
+
+# 任务分解提示词
+task_decompose: |
+  请帮助我将以下用户任务分解为多个子任务。每个子任务需要包含以下属性：
+
+  - `task_id`：子任务的唯一标识符（整数）。
+  - `name`：子任务的名称（字符串）。
+  - `priority`：子任务的优先级（整数，数值越小优先级越高）。
+  - `dep_id`：子任务的依赖任务ID（列表，包含所有依赖任务的ID，如果没有依赖则为None）。
+  - `is_interrupt`：子任务是否可以被中断（布尔值，True表示可以中断，False表示不可以中断）。
+  - `state`：子任务的初始状态（使用 `TaskState.WAITING`）。
+  - `device`：子任务使用的无人机（暂时不使用，可以忽略）。
+  - `instructions`：子任务的指令列表（暂时不使用，可以忽略）。
+  - `requirements`：子任务的额外要求，用于匹配无人机和模型（字典，键值对形式）。
+  - `models`：子任务使用的模型（暂时不使用，可以忽略）。
+
+  用户任务：{user_task}
+
+  请将用户任务分解为多个子任务，并以以下json格式返回结果，不要返回其他内容，严格保证Json格式的返回：
+
+  [
+      {{
+          "task_id": [子任务1的ID],
+          "name": "[子任务1的名称]",
+          "priority": [子任务1的优先级],
+          "dep_id": [子任务1的依赖任务ID],
+          "is_interrupt": [子任务1是否可以被中断],
+          "state": "WAITING",
+          "requirements": [子任务1的额外要求]
+      }},
+      {{
+          "task_id": [子任务2的ID],
+          "name": "[子任务2的名称]",
+          "priority": [子任务2的优先级],
+          "dep_id": [子任务2的依赖任务ID],
+          "is_interrupt": [子任务2是否可以被中断],
+          "state": "WAITING",
+          "requirements": [子任务2的额外要求]
+      }},
+      ...
+  ]
+
+# 生成步骤提示词
+generate_instruction: |
+  根据以下子任务信息，生成完成该子任务所需的步骤列表。每个步骤应包括步骤名称和描述信息，并以JSON格式输出。
+  子任务信息：
+  - 子任务ID: {sub_task_id}
+  - 名称: {sub_task_name}
+  - 优先级: {sub_task_priority}
+  - 依赖任务ID: {sub_task_dep_id}
+  - 是否可以中断: {sub_task_is_interrupt}
+  - 额外要求: {sub_task_requirements}
+
+  可选的步骤指令包括：
+  | 指令名称       | 描述                                     |
+  |----------------|------------------------------------------|
+  | takeoff        | 无人机垂直起飞                           |
+  | land           | 无人机从当前位置降落                     |
+  | hover          | 无人机在当前位置悬停                     |
+  | move_forward   | 无人机向前飞行                           |
+  | move_backward  | 无人机向后飞行                           |
+  | move_left      | 无人机向左飞行                           |
+  | move_right     | 无人机向右飞行                           |
+  | ascend         | 无人机上升                               |
+  | descend        | 无人机下降                               |
+  | search         | 无人机随机飞行
+  | yaw            | 无人机围绕垂直轴旋转                     |
+  | fly_to         | 无人机飞行到指定坐标点                   |
+  | return_to_home | 无人机返回起飞点降落                     |
+  | emergency_stop | 无人机紧急停止所有动作，并保持当前位置   |
+  | 自定义指令     | 根据具体任务需求自定义其他指令           |
+
+  请根据子任务的描述和额外要求，选择合适的指令生成步骤列表。注意只需要输出json格式的步骤的列表，严格保证json格式的输出，不需要输出其他内容。
+  示例：[{{"name":"takeoff","description":"无人机从地面垂直起飞到预设高度"}},{{"name":"ascend","description":"无人机垂直升高到居民楼的高度"}}]
+
+ 
+
+# 步骤生成指令提示词
+stepTranslate: |
+  根据输入的步骤列表{step}，将每个步骤转化为对应的无人机飞行指令。输入为一个步骤列表，每个步骤包含步骤名称和描述信息,一般都是只有一个步骤。输出为一个指令列表，每个指令包含指令名称和对应的参数（如果有）。
+  输入步骤列表示例：
+  [
+      {{
+          "name": "takeoff",
+          "description": "无人机从地面垂直起飞到预设高度5m"
+      }},
+  ]
+   基本指令：
+  - command_takeoff: 无人机起飞
+    - 参数: 
+    - 示例: Instruction('command_takeoff', {{}})
+  - command_pos: 飞行到位置（x, y, z）
+    - 参数: x, y, z
+    - 示例: Instruction('command_pos', {{'x': 0, 'y': 0, 'z': 5}})
+  - command_vel: 以某个速度（x, y, z）飞行时间t
+    - 参数: x, y, z, t
+    - 示例: Instruction('command_vel', {{'x': 0, 'y': 0, 'z': 0.5, 't': 5}})
+  - command_hover: 悬停在当前位置，持续时间t
+    - 参数: duration
+    - 示例: Instruction('command_hover', {{'duration': 5}})
+  - command_twist: 围绕z轴以速度rate旋转时间duration
+    - 参数: degree, rate
+    - 示例: Instruction('command_twist', {{'yaw_rate': 90, 'duration': 10}})
+  - command_land: 降落到当前位置
+    - 参数: 无
+    - 示例: Instruction('command_land', {{}})
+  - command_search: 在半径为r的圆形区域内搜索，持续时间t
+    - 参数: r, t
+    - 示例: Instruction('command_search', {{'r': 10, 't': 30}})
+  - command_interrupt: 中断当前任务
+    - 参数: 无
+    - 示例: Instruction('command_interrupt', {{}})
+
+  请先将子任务分解为多个步骤，这个中间过程你不需要输出，然后根据这些步骤选择合适的指令填充到 `instructions` 属性中，只返回json格式的指令，不要返回其他内容，即使没有合适的对应指令，也不要解释。
+  格式为：[
+    {{
+      "command": "",
+      "params": {{}}
+    }},
+  ]
+  对于  [
+      {{
+          "name": "takeoff",
+          "description": "无人机从地面垂直起飞到预设高度5m"
+      }},
+  ]，结果示例为：
+  [{{"command":"command_takeoff","params":{{}}}},{{"command":"command_pos","params":{{'x': 0, 'y': 0, 'z': 5}}}}] ，
+  需要注意的是，如果步骤描述中有直接给出的指令参数，直接使用，但当没有直接给出指令参数时，例如飞行到楼顶的高度，你需要根据给出一个较小的参数，注意必须给定，不能为空，后续通过传感器信息进行判断，不断调整无人机。
+
+# 无人机分配提示词
+droneAssignment: |
+  根据以下子任务信息，选择合适的无人机进行分配。每个子任务包含以下属性：
+  - 子任务ID: {sub_task_id}
+  - 名称: {sub_task_name}
+  - 优先级: {sub_task_priority}
+  - 依赖任务ID: {sub_task_dep_id}
+  - 是否可以中断: {sub_task_is_interrupt}
+  - 额外要求: {sub_task_requirements}
+  - 步骤列表: {sub_task_instructions}
+
+  可选的无人机包括：
+  | 无人机名称 | 无人机型号 | 无人机载荷 | 无人机速度 | 无人机续航时间 | 无人机最大飞行高度 | 无人机最大飞行距离 | 无人机最大飞行时间 | 
+  |------------|------------|------------|------------|----------------|-------------------|-------------------|-------------------|
+  | drone1     | DJI | 1.5kg | 20m/s | 31min | 6000m | 18km | 31min |
+  | drone2     | DJI | 1.4kg | 20m/s | 30min | 6000m | 18km | 30min |
+  请根据子任务的额外要求，选择合适的无人机进行分配，并以以下json格式返回结果，不要返回其他内容，严格保证Json格式的返回：
+  
+  [
+      {{
+          "task_id": [子任务1的ID],
+          "drone": "[无人机1的名称]"
+      }},
+      {{
+          "task_id": [子任务2的ID],
+          "drone": "[无人机2的名称]"
+      }},
+      ...
+  ]
+
+# 步骤执行效果检测提示词
+stepEffect: |
+
