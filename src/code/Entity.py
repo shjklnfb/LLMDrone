@@ -63,6 +63,20 @@ class SubTask:
     def add_instruction(self, instruction):
         self.instructions.append(instruction)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'priority': self.priority,
+            'dep_id': self.dep_id,
+            'is_interrupt': self.is_interrupt,
+            'state': self.state.name,  # 将枚举转换为字符串
+            'device': self.device,
+            'instructions': [str(instruction) for instruction in self.instructions],
+            'requirements': self.requirements,
+            'models': self.models
+        }
+
     def __lt__(self, other):
         # 比较任务的优先级，优先级高的任务应该排在前面
         return self.priority < other.priority

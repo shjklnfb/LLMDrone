@@ -25,9 +25,12 @@ class TestModule1(unittest.TestCase):
 
     # 2. 测试任务规划
     # def test_planner(self):
+    #     from src.code.TaskPlanner import TaskPlanner
     #     planner=TaskPlanner()
     #     result=planner.plan_task(user_task="在太行山航拍")
-    #     for i in result:
+    #     from src.llm.TaskMatch import choose_drone
+    #     res=choose_drone(result)
+    #     for i in res:
     #         print(i)
 
     # 3. 测试无人机指令执行器
@@ -42,121 +45,121 @@ class TestModule1(unittest.TestCase):
     #     monitor.run()
 
     # 5. 测试任务执行器
-    def test_taskExecutor(self):
-        from src.code.TaskExecutor import TaskExecutor
-        from src.code.InterruptListener import InterruptListener
-        subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
-            {
-            "name": "takeoff",
-            "description": "无人机垂直起飞到3m"
-            },
-            {
-            "name": "ascend",
-            "description": "无人机继续垂直攀升到20m"
-            },
-            {
-            "name": "yaw",
-            "description": "无人机环绕一圈，检查周围情况"
-            },
-            {
-            "name": "land",
-            "description": "无人机降落到原地"
-            },
-        ])
-        subtask2 = SubTask(
-            task_id=2, name="subtask2", priority=2, dep_id=[1], is_interrupt=0, device="iris_0", instructions=[
-            {
-                "name": "takeoff",
-                "description": "无人机垂直起飞"
-            },
-            {
-                "name": "move_forward",
-                "description": "无人机向前飞行"
-            },
-            {
-                "name": "hover",
-                "description": "无人机在当前位置悬停"
-            },
-            {
-                "name": "land",
-                "description": "无人机从当前位置降落"
-            },
-            ]
-        )
-        subtask3 = SubTask(
-            task_id=3, name="subtask3", priority=3, dep_id=[2], is_interrupt=0, device="iris_0", instructions=[
-            {
-                "name": "takeoff",
-                "description": "无人机垂直起飞"
-            },
-            {
-                "name": "move_left",
-                "description": "无人机向左飞行"
-            },
-            {
-                "name": "hover",
-                "description": "无人机在当前位置悬停"
-            },
-            {
-                "name": "land",
-                "description": "无人机从当前位置降落"
-            },
-            ]
-        )
-        subtask4 = SubTask(
-            task_id=4, name="subtask4", priority=4, dep_id=[], is_interrupt=0, device="typhoon_h480_1", instructions=[
-            {
-                "name": "takeoff",
-                "description": "无人机垂直起飞"
-            },
-            {
-                "name": "move_right",
-                "description": "无人机向右飞行"
-            },
-            {
-                "name": "hover",
-                "description": "无人机在当前位置悬停"
-            },
-            {
-                "name": "land",
-                "description": "无人机从当前位置降落"
-            },
-            ]
-        )
-        subtask5 = SubTask(
-            task_id=5, name="subtask5", priority=4, dep_id=[], is_interrupt=0, device="typhoon_h480_1", instructions=[
-            {
-                "name": "takeoff",
-                "description": "无人机垂直起飞"
-            },
-            {
-                "name": "move_backward",
-                "description": "无人机向后飞行"
-            },
-            {
-                "name": "hover",
-                "description": "无人机在当前位置悬停"
-            },
-            {
-                "name": "land",
-                "description": "无人机从当前位置降落"
-            },
-            ]
-        )
+    # def test_taskExecutor(self):
+    #     from src.code.TaskExecutor import TaskExecutor
+    #     from src.code.InterruptListener import InterruptListener
+    #     subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
+    #         {
+    #         "name": "takeoff",
+    #         "description": "无人机垂直起飞到3m"
+    #         },
+    #         {
+    #         "name": "ascend",
+    #         "description": "无人机继续垂直攀升到20m"
+    #         },
+    #         {
+    #         "name": "yaw",
+    #         "description": "无人机环绕一圈，检查周围情况"
+    #         },
+    #         {
+    #         "name": "land",
+    #         "description": "无人机降落到原地"
+    #         },
+    #     ])
+    #     subtask2 = SubTask(
+    #         task_id=2, name="subtask2", priority=2, dep_id=[1], is_interrupt=0, device="iris_0", instructions=[
+    #         {
+    #             "name": "takeoff",
+    #             "description": "无人机垂直起飞"
+    #         },
+    #         {
+    #             "name": "move_forward",
+    #             "description": "无人机向前飞行"
+    #         },
+    #         {
+    #             "name": "hover",
+    #             "description": "无人机在当前位置悬停"
+    #         },
+    #         {
+    #             "name": "land",
+    #             "description": "无人机从当前位置降落"
+    #         },
+    #         ]
+    #     )
+    #     subtask3 = SubTask(
+    #         task_id=3, name="subtask3", priority=3, dep_id=[2], is_interrupt=0, device="iris_0", instructions=[
+    #         {
+    #             "name": "takeoff",
+    #             "description": "无人机垂直起飞"
+    #         },
+    #         {
+    #             "name": "move_left",
+    #             "description": "无人机向左飞行"
+    #         },
+    #         {
+    #             "name": "hover",
+    #             "description": "无人机在当前位置悬停"
+    #         },
+    #         {
+    #             "name": "land",
+    #             "description": "无人机从当前位置降落"
+    #         },
+    #         ]
+    #     )
+    #     subtask4 = SubTask(
+    #         task_id=4, name="subtask4", priority=4, dep_id=[], is_interrupt=0, device="typhoon_h480_1", instructions=[
+    #         {
+    #             "name": "takeoff",
+    #             "description": "无人机垂直起飞"
+    #         },
+    #         {
+    #             "name": "move_right",
+    #             "description": "无人机向右飞行"
+    #         },
+    #         {
+    #             "name": "hover",
+    #             "description": "无人机在当前位置悬停"
+    #         },
+    #         {
+    #             "name": "land",
+    #             "description": "无人机从当前位置降落"
+    #         },
+    #         ]
+    #     )
+    #     subtask5 = SubTask(
+    #         task_id=5, name="subtask5", priority=4, dep_id=[], is_interrupt=0, device="typhoon_h480_1", instructions=[
+    #         {
+    #             "name": "takeoff",
+    #             "description": "无人机垂直起飞"
+    #         },
+    #         {
+    #             "name": "move_backward",
+    #             "description": "无人机向后飞行"
+    #         },
+    #         {
+    #             "name": "hover",
+    #             "description": "无人机在当前位置悬停"
+    #         },
+    #         {
+    #             "name": "land",
+    #             "description": "无人机从当前位置降落"
+    #         },
+    #         ]
+    #     )
 
-        task_executor = TaskExecutor()
-        task_executor.add_subtask(subtask1)
-        task_executor.add_subtask(subtask2)
-        task_executor.add_subtask(subtask3)
-        task_executor.add_subtask(subtask4)
-        task_executor.add_subtask(subtask5)
+    #     task_executor = TaskExecutor()
+    #     task_executor.add_subtask(subtask1)
+    #     task_executor.add_subtask(subtask2)
+    #     task_executor.add_subtask(subtask3)
+    #     task_executor.add_subtask(subtask4)
+    #     task_executor.add_subtask(subtask5)
 
-        interrupt_listener1 = InterruptListener(task_executor, 5000)
+    #     interrupt_listener1 = InterruptListener(task_executor, 5000)
 
-        interrupt_listener1.start()
+    #     interrupt_listener1.start()
 
-        task_executor.execute()
-        rospy.spin()  # 保持ROS节点运行
+    #     task_executor.execute()
+    #     rospy.spin()  # 保持ROS节点运行
 
     # 6. 测试步骤转指令
     # def test_stepTranslate(self):
@@ -312,9 +315,15 @@ class TestModule1(unittest.TestCase):
     #     # res = TaskAssigner(None,None,res).task_with_drone()
     #     for(i) in res:
     #         print(i)
-    
+
+    # 16. 测试启动文件生成
+    def test_generate_launch_file(self):
+        from src.llm.Initialize import generate_launch_file
+        generate_launch_file(["typhoon_h480_0","typhoon_h480_1","iris_0"],"world_file")
+
+
 if __name__ == '__main__':
-    import rospy
-    rospy.init_node('control_script', anonymous=True, disable_signals=True)
+    # import rospy
+    # rospy.init_node('control_script', anonymous=True, disable_signals=True)
     unittest.main()
 
