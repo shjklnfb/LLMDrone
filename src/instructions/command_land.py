@@ -3,6 +3,12 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 import sys
+import logging
+from datetime import datetime
+
+# 设置日志记录
+log_filename = datetime.now().strftime('../log/flight/command_land_%Y%m%d_%H%M%S.log')
+logging.basicConfig(filename=log_filename, level=logging.INFO)
 
 def send_land_command(prefix):
     node_name = f'{prefix}_land_command_sender'
@@ -19,6 +25,7 @@ def send_land_command(prefix):
 
     rate = rospy.Rate(10)  # 10 Hz
     rospy.loginfo("Publishing land command")
+    logging.info("Publishing land command")
     land_pub.publish(land_msg)
     rate.sleep()
 
@@ -26,7 +33,7 @@ if __name__ == '__main__':
     try:
         # 获取命令行参数
         if len(sys.argv) != 2:
-            print("Usage: python send_land_command.py <prefix>")
+            logging.error("Usage: python send_land_command.py <prefix>")
             sys.exit(1)
 
         prefix = sys.argv[1]

@@ -1,6 +1,12 @@
 import rospy
-from geometry_msgs.msg import PoseStamped
 import sys
+import logging
+from datetime import datetime
+from geometry_msgs.msg import PoseStamped
+
+# 设置日志记录
+log_filename = datetime.now().strftime('../log/flight/command_random_%Y%m%d_%H%M%S.log')
+logging.basicConfig(filename=log_filename, level=logging.INFO)
 
 def publish_random_flight_command(prefix, radius, duration):
     node_name = f'{prefix}_random_flight_command_publisher'
@@ -15,6 +21,7 @@ def publish_random_flight_command(prefix, radius, duration):
     command.pose.position.y = duration  # 持续时间
     command.header.stamp = rospy.Time.now()
     rospy.loginfo(f"Publishing random flight command: radius={radius}, duration={duration}")
+    logging.info(f"Publishing random flight command: radius={radius}, duration={duration}")
     command_pub.publish(command)
 
     rospy.loginfo("Random flight command published")
@@ -23,7 +30,7 @@ if __name__ == '__main__':
     try:
         # 获取命令行参数
         if len(sys.argv) != 4:
-            rospy.logerr("Usage: random_flight.py prefix radius duration")
+            logging.error("Usage: random_flight.py prefix radius duration")
             sys.exit(1)
 
         prefix = sys.argv[1]

@@ -1,6 +1,8 @@
 import threading
 import queue
 import time
+import os
+from datetime import datetime
 from src.code.Entity import SubTask, TaskState
 
 """
@@ -75,6 +77,7 @@ class TaskExecutor:
         while True:
             subtask = self.get_subtask()
             if subtask:
+                log_subtask(subtask, 'execute')
                 # 处理突发任务
                 if subtask.priority == 0:
                     from src.code.DroneUnit import DroneUnit
@@ -88,7 +91,7 @@ class TaskExecutor:
                             drone_unit.start()
                             self.drone_units[subtask.device] = drone_unit
                     else:
-                        print(f"{subtask.name} device not defined")
+                        log_error(f"{subtask.name} device not defined")
                     subtask.state = TaskState.RUNNING
                 else:
                     # 启动无人机控制单元，三个线程，执行子任务
@@ -103,7 +106,7 @@ class TaskExecutor:
                             drone_unit.start()
                             self.drone_units[subtask.device] = drone_unit
                     else:
-                        print(f"{subtask.name} device not defined")
+                        log_error(f"{subtask.name} device not defined")
                     subtask.state = TaskState.RUNNING
             time.sleep(1)
     
@@ -115,4 +118,25 @@ class TaskExecutor:
                 if task.dep_id and subtask.id in task.dep_id and self.check_dependencies(task):
                     task.state = TaskState.READY
                     self.priority_queue.put((task.priority, task))
-        print(f"Task {subtask.name} completed and dependencies checked.")
+        log_info(f"Task {subtask.name} completed and dependencies checked.")
+
+def log_subtask(subtask, log_type):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{log_type}.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        file.write(f"Subtask: {subtask.name}, Priority: {subtask.priority}, State: {subtask.state}\n")
+
+def log_error(message):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_error.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        file.write(message)
+
+def log_info(message):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_info.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        file.write(message)

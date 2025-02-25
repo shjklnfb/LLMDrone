@@ -69,6 +69,7 @@ generate_instruction: |
   | fly_to         | 无人机飞行到指定坐标点                   |
   | return_to_home | 无人机返回起飞点降落                     |
   | emergency_stop | 无人机紧急停止所有动作，并保持当前位置   |
+  | interrupt      | 中断当前任务                             |
   | 自定义指令     | 根据具体任务需求自定义其他指令           |
 
   请根据子任务的描述和额外要求，选择合适的指令生成步骤列表。注意只需要输出json格式的步骤的列表，严格保证json格式的输出，不需要输出其他内容。
@@ -159,5 +160,32 @@ droneAssignment: |
   ]
 
 # 步骤执行效果检测提示词
-stepEffect: |
-
+stepCheck: |
+  根据输入的步骤{step}和无人机监控器中的传感器数据和图像信息{data}，检查步骤是否得到满足。
+  如果步骤得到满足，返回 [{{"result":true,"instruction":none}}]；
+  如果步骤没有得到满足，返回 [{{"result":false,"instruction":[]}}]。
+  Instruction中为基本指令，你需要根据实际的执行情况，发布指令以达到步骤目标。基本指令有：
+  - command_takeoff: 无人机起飞
+    - 参数: 
+    - 示例: Instruction('command_takeoff', {{}})
+  - command_pos: 飞行到位置（x, y, z）
+    - 参数: x, y, z
+    - 示例: Instruction('command_pos', {{'x': 0, 'y': 0, 'z': 5}})
+  - command_vel: 以某个速度（x, y, z）飞行时间t
+    - 参数: x, y, z, t
+    - 示例: Instruction('command_vel', {{'x': 0, 'y': 0, 'z': 0.5, 't': 5}})
+  - command_hover: 悬停在当前位置，持续时间t
+    - 参数: duration
+    - 示例: Instruction('command_hover', {{'duration': 5}})
+  - command_twist: 围绕z轴以速度rate旋转时间duration
+    - 参数: degree, rate
+    - 示例: Instruction('command_twist', {{'yaw_rate': 90, 'duration': 10}})
+  - command_land: 降落到当前位置
+    - 参数: 无
+    - 示例: Instruction('command_land', {{}})
+  - command_search: 在半径为r的圆形区域内搜索，持续时间t
+    - 参数: r, t
+    - 示例: Instruction('command_search', {{'r': 10, 't': 30}})
+  - command_interrupt: 中断当前任务
+    - 参数: 无
+    - 示例: Instruction('command_interrupt', {{}})

@@ -45,7 +45,7 @@ class TestModule1(unittest.TestCase):
     def test_taskExecutor(self):
         from src.code.TaskExecutor import TaskExecutor
         from src.code.InterruptListener import InterruptListener
-        subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="typhoon_h480_0", instructions=[
+        subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
             {
             "name": "takeoff",
             "description": "无人机垂直起飞到3m"
@@ -64,7 +64,7 @@ class TestModule1(unittest.TestCase):
             },
         ])
         subtask2 = SubTask(
-            task_id=2, name="subtask2", priority=2, dep_id=[1], is_interrupt=0, device="typhoon_h480_0", instructions=[
+            task_id=2, name="subtask2", priority=2, dep_id=[1], is_interrupt=0, device="iris_0", instructions=[
             {
                 "name": "takeoff",
                 "description": "无人机垂直起飞"
@@ -84,7 +84,7 @@ class TestModule1(unittest.TestCase):
             ]
         )
         subtask3 = SubTask(
-            task_id=3, name="subtask3", priority=3, dep_id=[2], is_interrupt=0, device="typhoon_h480_0", instructions=[
+            task_id=3, name="subtask3", priority=3, dep_id=[2], is_interrupt=0, device="iris_0", instructions=[
             {
                 "name": "takeoff",
                 "description": "无人机垂直起飞"
@@ -151,9 +151,9 @@ class TestModule1(unittest.TestCase):
         task_executor.add_subtask(subtask4)
         task_executor.add_subtask(subtask5)
 
-        # interrupt_listener1 = InterruptListener(task_executor, 5000)
+        interrupt_listener1 = InterruptListener(task_executor, 5000)
 
-        # interrupt_listener1.start()
+        interrupt_listener1.start()
 
         task_executor.execute()
         rospy.spin()  # 保持ROS节点运行
@@ -314,5 +314,7 @@ class TestModule1(unittest.TestCase):
     #         print(i)
     
 if __name__ == '__main__':
+    import rospy
+    rospy.init_node('control_script', anonymous=True, disable_signals=True)
     unittest.main()
 

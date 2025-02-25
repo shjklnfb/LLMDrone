@@ -2,8 +2,14 @@
 # -*- coding: UTF-8 -*-
 import rospy
 import sys
+import logging
+from datetime import datetime
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
+
+# 设置日志记录
+log_filename = datetime.now().strftime('../log/flight/command_hover_%Y%m%d_%H%M%S.log')
+logging.basicConfig(filename=log_filename, level=logging.INFO)
 
 def send_emergency_hover_command(prefix, duration):
     node_name = f'{prefix}_emergency_hover_command_sender'
@@ -21,15 +27,15 @@ def send_emergency_hover_command(prefix, duration):
 
         hover_pub.publish(hover_msg)
         rospy.loginfo(f"Published emergency hover command at position: ({hover_msg.pose.position.x}, {hover_msg.pose.position.y}, {hover_msg.pose.position.z}) for {duration} seconds")
+        logging.info(f"Published emergency hover command at position: ({hover_msg.pose.position.x}, {hover_msg.pose.position.y}, {hover_msg.pose.position.z}) for {duration} seconds")
 
         rospy.signal_shutdown("Emergency hover command sent")
 
     rospy.Subscriber(f'/{prefix}/mavros/local_position/odom', Odometry, current_position_cb)
 
 if __name__ == '__main__':
-    # 获取命令行参数
     if len(sys.argv) != 3:
-        print("Usage: python send_emergency_hover_command.py <prefix> <duration>")
+        logging.error("Usage: python send_emergency_hover_command.py <prefix> <duration>")
         sys.exit(1)
 
     prefix = sys.argv[1]

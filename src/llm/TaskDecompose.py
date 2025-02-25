@@ -5,6 +5,8 @@ import re
 import ast
 import json
 import yaml
+import os
+from datetime import datetime
 
 # 通义千问plus api
 def call_with_messages(prompt):
@@ -22,17 +24,24 @@ def call_with_messages(prompt):
         enable_search=False
     )
     if(responses.status_code == 200):
+        log_response(responses)
         return responses
     else:
-        print("error")
-    # for response in responses:
-    #     if response.status_code == HTTPStatus.OK:
-    #         print(response)
-    #     else:
-    #         print('Request id: %s, Status code: %s, error code: %s, error message: %s' % (
-    #             response.request_id, response.status_code,
-    #             response.code, response.message
-    #         ))
+        log_error("Error in call_with_messages")
+
+def log_response(response):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        file.write(json.dumps(response, ensure_ascii=False, indent=4))
+
+def log_error(message):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_error.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        file.write(message)
 
 def format_instruction(response):
     # 提取子任务数据
@@ -42,8 +51,7 @@ def format_instruction(response):
     try:
         instructions_data = json.loads(content)
     except json.JSONDecodeError as e:
-        print(f"JSONDecodeError: {e}")
-        print(f"Failed to parse content: {content}")
+        log_error(f"JSONDecodeError: {e}\nFailed to parse content: {content}")
         instructions_data = []
 
     # 创建Instruction对象列表
@@ -54,13 +62,17 @@ def format_instruction(response):
 
 class TaskDecompose:
     def __init__(self):
-        with open('resources/prompt.yaml', 'r', encoding='utf-8') as file:
+        import os
+        # 读取提示词
+        prompt_path = os.path.expanduser('~/Desktop/LLMDrone_2/resources/prompt.yaml')
+        with open(prompt_path, 'r', encoding='utf-8') as file:
             self.prompts = yaml.safe_load(file)
 
     # 根据用户任务，生成子任务列表
     def task_decompose(self, user_task):
         prompt = self.prompts['task_decompose'].format(user_task=user_task)
         response = call_with_messages(prompt)
+        log_response(response)
         return response
 
     # 为每个子任务生成步骤并添加到指令列表中
@@ -74,5 +86,6 @@ class TaskDecompose:
             sub_task_requirements=sub_task.requirements
         )
         response = call_with_messages(prompt)
+        log_response(response)
         return response
-    
+

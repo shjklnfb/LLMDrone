@@ -3,14 +3,14 @@ import queue
 import time
 from src.code.DroneExecutor import DroneExecutor
 from src.code.Entity import SubTask, TaskState
+from src.llm.CheckStep import checkStep
 
 # 无人机调度器类
 class DroneScheduler(threading.Thread):
-    def __init__(self, drone_id, shared_data, interrupt_listener):
+    def __init__(self, drone_id, shared_data):
         super().__init__()
         self.drone_id = drone_id
         self.shared_data = shared_data
-        self.interrupt_listener = interrupt_listener
         self.subtask_queue = queue.Queue()  # 子任务队列
         self.step_queue = queue.Queue()  # 步骤队列
         self.current_subtask = None
@@ -72,4 +72,3 @@ class DroneScheduler(threading.Thread):
             self.subtask_queue.put(item)
         print("Emergency task handled")
         print("Resuming task")
-        # self.interrupt_listener.clear_interrupt()

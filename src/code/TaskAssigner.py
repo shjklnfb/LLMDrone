@@ -1,4 +1,6 @@
 from src.code.Entity import Drone,SubTask
+import os
+from datetime import datetime
 '''
 任务分配器：
 负责将任务分配给无人机，无人机是要在无人机库中进行选择，根据能力匹配，需要注意的是有些子任务必须分配到同一台无人机上。
@@ -31,7 +33,8 @@ class TaskAssigner:
     def task_with_drone(self):   
         #TODO 匹配        
         for i in self.subtasks:
-            i.device = "typhoon_h480_0"
+            i.device = "typhoon_h480_1"
+        log_subtasks(self.subtasks, 'task_with_drone')
         return self.subtasks
     
     '''
@@ -39,4 +42,20 @@ class TaskAssigner:
     '''
     def task_with_model(self):
         #TODO 匹配
+        log_subtasks(self.subtasks, 'task_with_model')
         return self.subtasks
+
+def log_subtasks(subtasks, log_type):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{log_type}.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        for subtask in subtasks:
+            file.write(f"Subtask: {subtask.name}, Device: {subtask.device}\n")
+
+def log_error(message):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_error.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        file.write(message)

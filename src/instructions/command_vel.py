@@ -2,7 +2,13 @@
 # -*- coding: UTF-8 -*-
 import rospy
 import sys
+import logging
+from datetime import datetime
 from geometry_msgs.msg import TwistStamped
+
+# 设置日志记录
+log_filename = datetime.now().strftime('../log/flight/command_vel_%Y%m%d_%H%M%S.log')
+logging.basicConfig(filename=log_filename, level=logging.INFO)
 
 def send_velocity_command(prefix, vel_x, vel_y, vel_z, duration):
     node_name = f'{prefix}_velocity_command_sender'
@@ -17,11 +23,12 @@ def send_velocity_command(prefix, vel_x, vel_y, vel_z, duration):
     twist.twist.linear.z = vel_z
     twist.header.stamp = rospy.Time.now() + rospy.Duration(duration)  # 将飞行时间作为时间戳
     rospy.loginfo(f"Publishing velocity command: ({vel_x}, {vel_y}, {vel_z}) for {duration} seconds")
+    logging.info(f"Publishing velocity command: ({vel_x}, {vel_y}, {vel_z}) for {duration} seconds")
     command_pub.publish(twist)
 
 if __name__ == '__main__':
     if len(sys.argv) != 6:
-        print("Usage: python send_velocity_command.py <prefix> <vel_x> <vel_y> <vel_z> <duration> ")
+        logging.error("Usage: python send_velocity_command.py <prefix> <vel_x> <vel_y> <vel_z> <duration>")
         sys.exit(1)
 
     prefix = sys.argv[1]

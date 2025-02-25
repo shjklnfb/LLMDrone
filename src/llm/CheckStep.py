@@ -1,7 +1,6 @@
 import dashscope
 import json
 import yaml
-from src.code.Entity import Instruction
 
 def call_with_messages(prompt):
     messages = [{"role":"system","content":"你是一个关于无人机执行任务的专家，了解ROS+PX4无人机仿真，了解无人机的各种话题和服务，懂得无人机基本的控制原理和基本控制指令。"},
@@ -22,32 +21,18 @@ def call_with_messages(prompt):
     else:
         print("error")
 
-def step_to_command(step):
-    # 读取提示词
-    # with open('resources/prompt.yaml', 'r', encoding='utf-8') as file:
-    #     prompts = yaml.safe_load(file)
+
+def checkStep(data, step):
     import os
     # 读取提示词
     prompt_path = os.path.expanduser('~/Desktop/LLMDrone_2/resources/prompt.yaml')
     with open(prompt_path, 'r', encoding='utf-8') as file:
         prompts = yaml.safe_load(file)
     
-    # 格式化提示词
-    prompt = prompts['stepTranslate'].format(step=step)
-    
-    # 调用API生成指令
+    prompt = prompts['stepCheck'].format(data=data, step=step)
     response = call_with_messages(prompt)
-
-    # 解析响应
-    content = response['output']['choices'][0]['message']['content']
-    
-    # 解析JSON字符串
-    try:
-        commands_data = json.loads(content)
-    except json.JSONDecodeError as e:
-        print(f"JSONDecodeError: {e}")
-        print(f"Failed to parse content: {content}")
-        commands_data = []
-    
-
-    return commands_data
+    print(11111)
+    print(response)
+    # result = response.json()
+    # formatted_result = result['choices'][0]['message']['content']
+    # return formatted_result

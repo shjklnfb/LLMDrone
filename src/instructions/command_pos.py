@@ -1,9 +1,13 @@
 import rospy
-from geometry_msgs.msg import PoseStamped
 import sys
-# 发布位置
-# 参数：namespace，x,y,z
-# TODO 能够自由优先级，调整日志
+import logging
+from datetime import datetime
+from geometry_msgs.msg import PoseStamped
+
+# 设置日志记录
+log_filename = datetime.now().strftime('../log/flight/command_pos_%Y%m%d_%H%M%S.log')
+logging.basicConfig(filename=log_filename, level=logging.INFO)
+
 def publish_command(prefix, x, y, z):
     node_name = f'{prefix}_command_publisher'
     # rospy.init_node(node_name, anonymous=True,)
@@ -18,15 +22,17 @@ def publish_command(prefix, x, y, z):
     command.pose.position.z = z
     command.header.stamp = rospy.Time.now()
     rospy.loginfo(f"Publishing new command: ({x}, {y}, {z})")
+    logging.info(f"Publishing new command: ({x}, {y}, {z})")
     command_pub.publish(command)
 
     rospy.loginfo("Command published")
+    logging.info("Command published")
 
 if __name__ == '__main__':
     try:
         # 获取命令行参数
         if len(sys.argv) != 5:
-            rospy.logerr("Usage: pos.py prefix x y z ")
+            logging.error("Usage: pos.py prefix x y z")
             sys.exit(1)
 
         prefix = sys.argv[1]

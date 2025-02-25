@@ -3,6 +3,8 @@ from src.llm.TaskDecompose import TaskDecompose
 import json
 import re
 import ast
+import os
+from datetime import datetime
 
 '''
 任务规划器：
@@ -21,11 +23,13 @@ class TaskPlanner:
         # 调用任务分解方法
         response = taskDecompose.task_decompose(user_task)
         self.subtasks = TaskPlanner.format_decompose(response)
+        log_response(response, 'task_decompose')
 
         # 调用步骤生成方法
         for subtask in self.subtasks:
             response = taskDecompose.generate_instruction(subtask)
             subtask.instructions = TaskPlanner.format_instruction(response)
+            log_response(response, 'generate_instruction')
         # 返回子任务，包含名称、要求、指令等
         return self.subtasks
     
@@ -46,8 +50,7 @@ class TaskPlanner:
             try:
                 subtasks_data = json.loads(content)
             except json.JSONDecodeError as e:
-                print(f"JSONDecodeError: {e}")
-                print(f"Failed to parse content: {content}")
+                log_error(f"JSONDecodeError: {e}\nFailed to parse content: {content}")
 
         # 将解析后的数据转化为子任务对象
         subtasks = []
@@ -75,10 +78,23 @@ class TaskPlanner:
         try:
             instructions_data = json.loads(content)
         except json.JSONDecodeError as e:
-            print(f"JSONDecodeError: {e}")
-            print(f"Failed to parse content: {content}")
+            log_error(f"JSONDecodeError: {e}\nFailed to parse content: {content}")
             instructions_data = []
         return instructions_data
+
+def log_response(response, log_type):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{log_type}.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        file.write(json.dumps(response, ensure_ascii=False, indent=4))
+
+def log_error(message):
+    log_dir = '../log/task'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_error.log")
+    with open(log_file, 'w', encoding='utf-8') as file:
+        file.write(message)
 
 
 

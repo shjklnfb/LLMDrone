@@ -1,37 +1,53 @@
 from openai import OpenAI
 import os
 import base64
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 
+import os
+import base64
+import cv2
+from cv_bridge import CvBridge
+from openai import OpenAI
+from sensor_msgs.msg import Image
 
-#  base 64 编码格式
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
+# 将 ROS 的 sensor_msgs/Image 转换为 Base64 编码的图像数据
+def image_msg_to_base64(image_msg):
+    bridge = CvBridge()
+    # 将 ROS 图像消息转换为 OpenCV 格式
+    cv_image = bridge.imgmsg_to_cv2(image_msg, desired_encoding='bgr8')
+    # 将 OpenCV 图像编码为 JPEG 格式
+    _, buffer = cv2.imencode('.jpg', cv_image)
+    # 将图像数据转换为 Base64 编码
+    base64_image = base64.b64encode(buffer).decode("utf-8")
+    return base64_image
 
+# 图像分析方法
+def analyze_image(image_msg):
+    # 将 ROS 图像消息转换为 Base64 编码
+    base64_image = image_msg_to_base64(image_msg)
 
-base64_image = encode_image("image_20250102_232514.jpg")
-client = OpenAI(
-    # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx"
-    api_key="sk-d34cba22d2a04a5c8c191f082106d07e",
-    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-)
-completion = client.chat.completions.create(
-    model="qwen-vl-max-latest",
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "image_url",
-                    # 需要注意，传入BASE64，图像格式（即image/{format}）需要与支持的图片列表中的Content Type保持一致。"f"是字符串格式化的方法。
-                    # PNG图像：  f"data:image/png;base64,{base64_image}"
-                    # JPEG图像： f"data:image/jpeg;base64,{base64_image}"
-                    # WEBP图像： f"data:image/webp;base64,{base64_image}"
-                    "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}, 
-                },
-                {"type": "text", "text": "这是什么?"},
-            ],
-        }
-    ],
-)
-print(completion.choices[0].message.content)
+    # 初始化 OpenAI 客户端
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY", "sk-d34cba22d2a04a5c8c191f082106d07e"),
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+    )
+
+    # 调用 OpenAI API 进行图像分析
+    completion = client.chat.completions.create(
+        model="qwen-vl-max-latest",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
+                    },
+                    {"type": "text", "text": "这是什么?"}
+                ]
+            }
+        ]
+    )
+    return completion.choices[0].message.content
+
