@@ -31,11 +31,11 @@ class TaskAssigner:
     将子任务与无人机进行匹配
     '''
     def task_with_drone(self):   
-        #TODO 匹配        
-        for i in self.subtasks:
-            i.device = "typhoon_h480_1"
-        log_subtasks(self.subtasks, 'task_with_drone')
-        return self.subtasks
+        from src.llm.TaskMatch import choose_drone
+        # 无人机分配
+        return choose_drone(self.subtasks)
+
+        
     
     '''
     将子任务与模型进行匹配

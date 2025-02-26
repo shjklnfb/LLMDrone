@@ -121,21 +121,21 @@ class TaskExecutor:
         log_info(f"Task {subtask.name} completed and dependencies checked.")
 
 def log_subtask(subtask, log_type):
-    log_dir = '../log/task'
+    log_dir = 'log/task'
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{log_type}.log")
     with open(log_file, 'w', encoding='utf-8') as file:
         file.write(f"Subtask: {subtask.name}, Priority: {subtask.priority}, State: {subtask.state}\n")
 
 def log_error(message):
-    log_dir = '../log/task'
+    log_dir = 'log/task'
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_error.log")
     with open(log_file, 'w', encoding='utf-8') as file:
         file.write(message)
 
 def log_info(message):
-    log_dir = '../log/task'
+    log_dir = 'log/task'
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_info.log")
     with open(log_file, 'w', encoding='utf-8') as file:

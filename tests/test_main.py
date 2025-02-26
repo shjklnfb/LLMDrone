@@ -317,9 +317,29 @@ class TestModule1(unittest.TestCase):
     #         print(i)
 
     # 16. 测试启动文件生成
-    def test_generate_launch_file(self):
-        from src.llm.Initialize import generate_launch_file
-        generate_launch_file(["typhoon_h480_0","typhoon_h480_1","iris_0"],"world_file")
+    # def test_generate_launch_file(self):
+    #     from src.llm.Initialize import generate_launch_file
+    #     generate_launch_file(["typhoon_h480_0","typhoon_h480_1","iris_0"],"world_file")
+
+    # 17. 测试任务阶段流程
+    def test_task_stage(self):
+        from src.code.TaskPlanner import TaskPlanner
+        from src.code.TaskExecutor import TaskExecutor
+        from src.code.InterruptListener import InterruptListener
+        from src.code.TaskAssigner import TaskAssigner
+        from src.code.SimulationInitializer import SimulationInitializer 
+        res = TaskPlanner().plan_task("无人机搜索居民楼楼顶的人员")
+        res = TaskAssigner(None,None,res).task_with_drone()
+        maps = "world_file"
+        drones = [subtask.device for subtask in res]
+        SimulationInitializer.generate_init_file(drones,maps)
+        # task_executor = TaskExecutor()
+        # for i in res:
+        #     print(i)
+        #     task_executor.add_subtask(i)
+        # interrupt_listener1 = InterruptListener(task_executor, 5000)
+        # interrupt_listener1.start()
+        # task_executor.execute()
 
 
 if __name__ == '__main__':

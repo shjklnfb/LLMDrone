@@ -26,14 +26,14 @@ def call_with_messages(prompt):
         return None
 
 def log_response(response):
-    log_dir = '../log/task'
+    log_dir = 'log/task'
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log")
     with open(log_file, 'w', encoding='utf-8') as file:
         file.write(json.dumps(response, ensure_ascii=False, indent=4))
 
 def log_error(message):
-    log_dir = '../log/task'
+    log_dir = 'log/task'
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_error.log")
     with open(log_file, 'w', encoding='utf-8') as file:
