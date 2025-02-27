@@ -210,8 +210,7 @@ class CommandTakeoff:
             rospy.loginfo(f"Executing random flight command in radius: {command['radius']} for {command['duration']} seconds")
             logging.info(f"Executing random flight command in radius: {command['radius']} for {command['duration']} seconds")
             position_pub = rospy.Publisher(f'/{self.prefix}/mavros/setpoint_position/local', PoseStamped, queue_size=10)
-            rate = rospy.Rate(2)  # 降低更新频率到2 Hz
-            max_step_distance = command['radius'] / 5  # 限制每次位置变化的最大距离为半径的1/5
+            rate = rospy.Rate(0.5)  # 降低更新频率到1 Hz
             start_time = rospy.Time.now()
             while rospy.Time.now() - start_time < rospy.Duration(command['duration']):
                 if self.interrupt_received or not self.is_executing:
@@ -219,11 +218,10 @@ class CommandTakeoff:
                     logging.info("Command interrupted")
                     self.interrupt_received = False
                     break
-                # 生成随机目标位置
+                # 生成随机目标位置，尽量靠近边缘
                 angle = random.uniform(0, 2 * math.pi)
-                distance = random.uniform(0, max_step_distance)
-                target_x = self.current_target_pose.pose.position.x + distance * math.cos(angle)
-                target_y = self.current_target_pose.pose.position.y + distance * math.sin(angle)
+                target_x = self.current_target_pose.pose.position.x + command['radius'] * math.cos(angle)
+                target_y = self.current_target_pose.pose.position.y + command['radius'] * math.sin(angle)
                 target_z = self.current_target_pose.pose.position.z  # 保持当前高度
                 pose.pose.position.x = target_x
                 pose.pose.position.y = target_y
@@ -238,6 +236,40 @@ class CommandTakeoff:
         self.is_executing = False  # 执行完成，标志更新
         self.current_command = None  # 清除当前指令
         self.hold_position(self.current_target_pose)
+
+        #     # 如果是随机飞行指令
+        # elif command['type'] == 'random_flight':
+        #     rospy.loginfo(f"Executing random flight command in radius: {command['radius']} for {command['duration']} seconds")
+        #     logging.info(f"Executing random flight command in radius: {command['radius']} for {command['duration']} seconds")
+        #     position_pub = rospy.Publisher(f'/{self.prefix}/mavros/setpoint_position/local', PoseStamped, queue_size=10)
+        #     rate = rospy.Rate(2)  # 降低更新频率到2 Hz
+        #     max_step_distance = command['radius'] / 5  # 限制每次位置变化的最大距离为半径的1/5
+        #     start_time = rospy.Time.now()
+        #     while rospy.Time.now() - start_time < rospy.Duration(command['duration']):
+        #         if self.interrupt_received or not self.is_executing:
+        #             rospy.loginfo("Command interrupted")
+        #             logging.info("Command interrupted")
+        #             self.interrupt_received = False
+        #             break
+        #         # 生成随机目标位置
+        #         angle = random.uniform(0, 2 * math.pi)
+        #         distance = random.uniform(0, max_step_distance)
+        #         target_x = self.current_target_pose.pose.position.x + distance * math.cos(angle)
+        #         target_y = self.current_target_pose.pose.position.y + distance * math.sin(angle)
+        #         target_z = self.current_target_pose.pose.position.z  # 保持当前高度
+        #         pose.pose.position.x = target_x
+        #         pose.pose.position.y = target_y
+        #         pose.pose.position.z = target_z
+        #         position_pub.publish(pose)
+        #         self.current_target_pose = pose  # 更新当前目标位置
+        #         rate.sleep()
+        #     rospy.loginfo("Random flight command executed")
+        #     logging.info("Random flight command executed")
+
+        # # 指令执行完成后，保持目标位置
+        # self.is_executing = False  # 执行完成，标志更新
+        # self.current_command = None  # 清除当前指令
+        # self.hold_position(self.current_target_pose)
 
     # 保持目标位置
     def hold_position(self, target_pose):

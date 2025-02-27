@@ -35,7 +35,7 @@ def analyze_image(image_msg):
 
     # 调用 OpenAI API 进行图像分析
     completion = client.chat.completions.create(
-        model="qwen-vl-max-latest",
+        model="qwen-vl-plus",
         messages=[
             {
                 "role": "user",
@@ -44,7 +44,7 @@ def analyze_image(image_msg):
                         "type": "image_url",
                         "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
                     },
-                    {"type": "text", "text": "这是什么?"}
+                    {"type": "text", "text": "这个图片是一架在仿真环境中飞行的无人机携带的底部摄像头拍摄的，你需要识别出当前图片中的内容，描述具体信息"}
                 ]
             }
         ]

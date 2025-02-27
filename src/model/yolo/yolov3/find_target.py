@@ -10,8 +10,8 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Imu
 
-# 初始化ROS节点
-rospy.init_node('offboard_ctr')
+# # 初始化ROS节点
+# rospy.init_node('offboard_ctr')
 
 # 加载YOLOv3 Tiny模型
 net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg")
@@ -96,5 +96,5 @@ annotated_image_pub = rospy.Publisher('/annotated_image', Image, queue_size=10)
 # 检测结果发布
 result_pub = rospy.Publisher('/detection_results', String, queue_size=10)
 
-rospy.spin()
+# rospy.spin()
 

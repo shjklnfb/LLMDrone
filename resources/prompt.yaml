@@ -163,11 +163,11 @@ droneAssignment: |
 stepCheck: |
   根据输入的步骤{step}和无人机监控器中的传感器数据和图像信息{data}，检查步骤是否得到满足。
   如果步骤得到满足，返回 [{{"result":true,"instruction":none}}]；
-  如果步骤没有得到满足，返回 [{{"result":false,"instruction":[]}}]。
+  如果步骤没有得到满足，返回 [{{"result":false,"instruction":[    {{
+      "command": "",
+      "params": {{}}
+    }},]}}]。
   Instruction中为基本指令，你需要根据实际的执行情况，发布指令以达到步骤目标。基本指令有：
-  - command_takeoff: 无人机起飞
-    - 参数: 
-    - 示例: Instruction('command_takeoff', {{}})
   - command_pos: 飞行到位置（x, y, z）
     - 参数: x, y, z
     - 示例: Instruction('command_pos', {{'x': 0, 'y': 0, 'z': 5}})
@@ -189,6 +189,8 @@ stepCheck: |
   - command_interrupt: 中断当前任务
     - 参数: 无
     - 示例: Instruction('command_interrupt', {{}})
+    注意：你的返回结果中的instruction必须从上面所给的基本指令中进行选择，且只能够发布一条指令.另外，必须严格以上面的返回形式输出，不要返回任何其他内容,不需要任何解释。
+
 
 # 无人机分配提示词
 DroneAssign: |

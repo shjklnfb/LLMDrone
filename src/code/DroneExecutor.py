@@ -6,7 +6,7 @@ from src.instructions.command_takeoff import command_takeoff
 from src.instructions.command_pos import publish_command as command_pos
 from src.instructions.command_vel import send_velocity_command as command_vel
 from src.instructions.command_twist import send_rotate_command as command_twist
-from src.instructions.command_twist import send_rotate_command as command_random
+from src.instructions.command_search import publish_random_flight_command as command_search
 from src.instructions.command_hover import send_emergency_hover_command as command_hover
 from src.instructions.command_land import send_land_command as command_land
 
@@ -24,8 +24,12 @@ class DroneExecutor(threading.Thread):
         print(f"Executing step {self.step} on drone {self.drone_id}")
         command = self.translate_to_command(self.step)
         self.execute_command(command)
-        # current_state = self.shared_data.get(self.drone_id, {})
-        # checkStep(current_state, self.step)
+        current_state = self.shared_data.get(self.drone_id, {})
+        res,instruction = checkStep(current_state, self.step)
+        while not res:
+            self.execute_command(instruction)
+            current_state = self.shared_data.get(self.drone_id, {})
+            res,instruction = checkStep(current_state,self.step)
         time.sleep(1)
 
     # 使用LLM将步骤翻译为无人机指令 
@@ -47,8 +51,8 @@ class DroneExecutor(threading.Thread):
                 command_vel(self.drone_id, c["params"]['x'], c["params"]['y'], c["params"]['z'], c["params"]['t'])
             elif c["command"] == "command_twist":
                 command_twist(self.drone_id, c["params"]['yaw_rate'], c["params"]['duration'])
-            elif c["command"] == "command_random":
-                command_random(self.drone_id, c["params"]['radius'], c["params"]['duration'])
+            elif c["command"] == "command_search":
+                command_search(self.drone_id, c["params"]['r'], c["params"]['t'])
             elif c["command"] == "command_hover":
                 time.sleep(c["params"]['duration'])
             elif c["command"] == "command_land":

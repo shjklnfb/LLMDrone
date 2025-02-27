@@ -322,28 +322,77 @@ class TestModule1(unittest.TestCase):
     #     generate_launch_file(["typhoon_h480_0","typhoon_h480_1","iris_0"],"world_file")
 
     # 17. 测试任务阶段流程
-    def test_task_stage(self):
-        from src.code.TaskPlanner import TaskPlanner
+    # def test_task_stage(self):
+    #     from src.code.TaskPlanner import TaskPlanner
+    #     from src.code.TaskExecutor import TaskExecutor
+    #     from src.code.InterruptListener import InterruptListener
+    #     from src.code.TaskAssigner import TaskAssigner
+    #     from src.code.SimulationInitializer import SimulationInitializer 
+    #     res = TaskPlanner().plan_task("无人机搜索居民楼楼顶的人员")
+    #     res = TaskAssigner(None,None,res).task_with_drone()
+    #     maps = "world_file"
+    #     drones = [subtask.device for subtask in res]
+    #     SimulationInitializer.generate_init_file(drones,maps)
+    #     # task_executor = TaskExecutor()
+    #     # for i in res:
+    #     #     print(i)
+    #     #     task_executor.add_subtask(i)
+    #     # interrupt_listener1 = InterruptListener(task_executor, 5000)
+    #     # interrupt_listener1.start()
+    #     # task_executor.execute()
+
+    #  18. 测试步骤反馈
+    def test_taskExecutor(self):
         from src.code.TaskExecutor import TaskExecutor
         from src.code.InterruptListener import InterruptListener
-        from src.code.TaskAssigner import TaskAssigner
-        from src.code.SimulationInitializer import SimulationInitializer 
-        res = TaskPlanner().plan_task("无人机搜索居民楼楼顶的人员")
-        res = TaskAssigner(None,None,res).task_with_drone()
-        maps = "world_file"
-        drones = [subtask.device for subtask in res]
-        SimulationInitializer.generate_init_file(drones,maps)
-        # task_executor = TaskExecutor()
-        # for i in res:
-        #     print(i)
-        #     task_executor.add_subtask(i)
-        # interrupt_listener1 = InterruptListener(task_executor, 5000)
-        # interrupt_listener1.start()
-        # task_executor.execute()
+        subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
+            {
+            "name": "takeoff",
+            "description": "无人机垂直起飞到3m"
+            },
+            {
+            "name": "ascend",
+            "description": "飞行到一个没有障碍物的高度,至少20m"
+            },
+            {
+            "name": "search",
+            "description": "无人机在20m高度盘旋飞行，寻找红色房顶的加油站,当发现目标后，悬停在红色房顶的加油站上空.如果没有找到，扩大搜索范围.另外，在搜索的时间内，不再发布新的搜索指令"
+            },
+            {
+            "name": "hover",
+            "description": "无人机悬停300秒"
+            },
+            # {
+            # "name": "ascend",
+            # "description": "无人机继续垂直攀升到20m"
+            # },
+            # {
+            # "name": "yaw",
+            # "description": "无人机环绕一圈，检查周围情况"
+            # },
+            # {
+            # "name": "search",
+            # "description": "无人机搜索居民楼,飞行到居民楼楼顶"
+            # },
+            # {
+            # "name": "land",
+            # "description": "无人机降落到原地"
+            # },
+        ])
+
+        task_executor = TaskExecutor()
+        task_executor.add_subtask(subtask1)
+
+        interrupt_listener1 = InterruptListener(task_executor, 5000)
+
+        interrupt_listener1.start()
+
+        task_executor.execute()
+        rospy.spin()  # 保持ROS节点运行
 
 
 if __name__ == '__main__':
-    # import rospy
-    # rospy.init_node('control_script', anonymous=True, disable_signals=True)
+    import rospy
+    rospy.init_node('control_script', anonymous=True, disable_signals=True)
     unittest.main()
 

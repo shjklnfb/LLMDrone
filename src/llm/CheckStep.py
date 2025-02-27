@@ -31,8 +31,11 @@ def checkStep(data, step):
     
     prompt = prompts['stepCheck'].format(data=data, step=step)
     response = call_with_messages(prompt)
-    print(11111)
     print(response)
-    # result = response.json()
-    # formatted_result = result['choices'][0]['message']['content']
-    # return formatted_result
+    if response:
+        response_content = json.loads(response['output']['choices'][0]['message']['content'])
+        result = response_content[0]['result']
+        instruction = response_content[0]['instruction']
+        return result, instruction
+    else:
+        return None, None
