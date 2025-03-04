@@ -48,7 +48,11 @@ def choose_drone(subtasks):
     #     prompts = yaml.safe_load(file)
     import os
     # 读取提示词
+<<<<<<< HEAD
     prompt_path = os.path.expanduser('~/Desktop/LLMDrone/resources/prompt.yaml')
+=======
+    prompt_path = os.path.expanduser('~/Desktop/LLMDrone_2/resources/prompt.yaml')
+>>>>>>> 450d589f567e2485c12b76bfb3f3a540bcd7424a
     with open(prompt_path, 'r', encoding='utf-8') as file:
         prompts = yaml.safe_load(file)
     
