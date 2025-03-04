@@ -31,6 +31,7 @@ class CommandTakeoff:
         self.prefix = namespace  # 命名空间
         self.clear_queue_flag = False
         self.interrupt_received = False  # 标志是否接收到中断指令
+        self.command_finished_callback = None  # 回调函数
 
     # 状态回调函数
     def state_cb(self, msg):
@@ -236,40 +237,9 @@ class CommandTakeoff:
         self.is_executing = False  # 执行完成，标志更新
         self.current_command = None  # 清除当前指令
         self.hold_position(self.current_target_pose)
-
-        #     # 如果是随机飞行指令
-        # elif command['type'] == 'random_flight':
-        #     rospy.loginfo(f"Executing random flight command in radius: {command['radius']} for {command['duration']} seconds")
-        #     logging.info(f"Executing random flight command in radius: {command['radius']} for {command['duration']} seconds")
-        #     position_pub = rospy.Publisher(f'/{self.prefix}/mavros/setpoint_position/local', PoseStamped, queue_size=10)
-        #     rate = rospy.Rate(2)  # 降低更新频率到2 Hz
-        #     max_step_distance = command['radius'] / 5  # 限制每次位置变化的最大距离为半径的1/5
-        #     start_time = rospy.Time.now()
-        #     while rospy.Time.now() - start_time < rospy.Duration(command['duration']):
-        #         if self.interrupt_received or not self.is_executing:
-        #             rospy.loginfo("Command interrupted")
-        #             logging.info("Command interrupted")
-        #             self.interrupt_received = False
-        #             break
-        #         # 生成随机目标位置
-        #         angle = random.uniform(0, 2 * math.pi)
-        #         distance = random.uniform(0, max_step_distance)
-        #         target_x = self.current_target_pose.pose.position.x + distance * math.cos(angle)
-        #         target_y = self.current_target_pose.pose.position.y + distance * math.sin(angle)
-        #         target_z = self.current_target_pose.pose.position.z  # 保持当前高度
-        #         pose.pose.position.x = target_x
-        #         pose.pose.position.y = target_y
-        #         pose.pose.position.z = target_z
-        #         position_pub.publish(pose)
-        #         self.current_target_pose = pose  # 更新当前目标位置
-        #         rate.sleep()
-        #     rospy.loginfo("Random flight command executed")
-        #     logging.info("Random flight command executed")
-
-        # # 指令执行完成后，保持目标位置
-        # self.is_executing = False  # 执行完成，标志更新
-        # self.current_command = None  # 清除当前指令
-        # self.hold_position(self.current_target_pose)
+        
+        if self.command_finished_callback:
+            self.command_finished_callback()  # 通知指令执行完成
 
     # 保持目标位置
     def hold_position(self, target_pose):
@@ -322,7 +292,7 @@ class CommandTakeoff:
         set_mode_client = rospy.ServiceProxy(f'/{self.prefix}/mavros/set_mode', SetMode)
         # 等待飞控连接
         rate = rospy.Rate(20.0)
-        while not rospy.is_shutdown() and not self.current_state.connected:
+        while not self.current_state.connected:
             rospy.loginfo("Waiting for FCU connection...")
             logging.info("Waiting for FCU connection...")
             rate.sleep()
@@ -352,8 +322,9 @@ class CommandTakeoff:
         # 保持主循环活跃
         rospy.spin()
 
-def command_takeoff(namespace):
+def command_takeoff(namespace, command_finished_callback=None):
     takeoff_instance = CommandTakeoff(namespace)
+    takeoff_instance.command_finished_callback = command_finished_callback
     takeoff_instance.control_script()
 
 if __name__ == '__main__':

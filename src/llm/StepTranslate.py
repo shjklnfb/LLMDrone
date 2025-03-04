@@ -28,7 +28,7 @@ def step_to_command(step):
     #     prompts = yaml.safe_load(file)
     import os
     # 读取提示词
-    prompt_path = os.path.expanduser('~/Desktop/LLMDrone_2/resources/prompt.yaml')
+    prompt_path = os.path.expanduser('~/Desktop/LLMDrone/resources/prompt.yaml')
     with open(prompt_path, 'r', encoding='utf-8') as file:
         prompts = yaml.safe_load(file)
     

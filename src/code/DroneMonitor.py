@@ -5,9 +5,9 @@ from datetime import datetime
 import rospy
 from mavros_msgs.msg import State
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from mavros_msgs.srv import CommandBool
-from src.llm.ImageRecognition import analyze_image
+from src.llm.ImageRecognition import analyze_image,analyze_depth_image
 
 # 无人机监控器类
 class DroneMonitor(threading.Thread):
@@ -41,23 +41,36 @@ class DroneMonitor(threading.Thread):
 
     def image_cb(self, image):
         self.log(f"Drone {self.drone_id} received image data")
-        analysis_result = analyze_image(image)
-        self.shared_data[self.drone_id]['image'] = analysis_result
-        self.log(f"Drone {self.drone_id} image analysis result: {analysis_result}")
+        step = self.shared_data[self.drone_id].get('step', 0)
+        # analysis_result = analyze_image(image,step=step)
+        self.shared_data[self.drone_id]['image'] = image
+        # self.log(f"Drone {self.drone_id} image analysis result: {image}")
+
+    def depth_image_cb(self, image):
+        self.log(f"Drone {self.drone_id} received depth image data")
+        step = self.shared_data[self.drone_id].get('step', 0)
+        # analysis_result = analyze_depth_image(image, step)
+        self.shared_data[self.drone_id]['depth_image'] = image
+        # self.log(f"Drone {self.drone_id} depth_image analysis result: {image}")
+
+    def depth_camera_info_cb(self, camera_info):
+        self.shared_data[self.drone_id]['camera_info'] = camera_info
+        self.log(f"Drone {self.drone_id} received depth camera info")
         
     # 监控无人机
     def monitor_drone(self):
         self.log(f"Starting monitoring for drone {self.drone_id}")
-        time.sleep(3)
         # rospy.init_node(f'drone_monitor_{self.drone_id}', anonymous=True)
         prefix = f'{self.drone_id}'
         
         state_sub = rospy.Subscriber(f'/{prefix}/mavros/state', State, self.state_cb)
         local_pos_sub = rospy.Subscriber(f'/{prefix}/mavros/local_position/odom', Odometry, self.local_pos_cb)
-        image_sub = rospy.Subscriber(f'/{prefix}/camera/image_raw', Image, self.image_cb)
+        image_sub = rospy.Subscriber(f'/{prefix}/realsense/depth_camera/color/image_raw', Image, self.image_cb)
+        depth_image_sub = rospy.Subscriber(f'/{prefix}/realsense/depth_camera/depth/image_raw', Image, self.depth_image_cb)
+        depth_camera_info_sub = rospy.Subscriber(f'/{prefix}/realsense/depth_camera/depth/camera_info', CameraInfo, self.depth_camera_info_cb)
         arming_client = rospy.ServiceProxy(f'/{prefix}/mavros/cmd/arming', CommandBool)
         
+        # 每秒执行一次，将无人机的状态、位置、速度、图像数据等信息存储到共享数据中
         rate = rospy.Rate(1)  # 1 Hz
         while not rospy.is_shutdown():
-            # Here you can add any additional monitoring logic if needed
             rate.sleep()

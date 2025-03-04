@@ -19,23 +19,29 @@ def call_with_messages(prompt):
     if(responses.status_code == 200):
         return responses
     else:
-        print("error")
+        print(responses)
 
 
-def checkStep(data, step):
+def checkStep(data, step, image_info=None, short_term_memory=None):
     import os
     # 读取提示词
-    prompt_path = os.path.expanduser('~/Desktop/LLMDrone_2/resources/prompt.yaml')
+    prompt_path = os.path.expanduser('~/Desktop/LLMDrone/resources/prompt.yaml')
     with open(prompt_path, 'r', encoding='utf-8') as file:
         prompts = yaml.safe_load(file)
     
-    prompt = prompts['stepCheck'].format(data=data, step=step)
+    # 获取短期记忆中的内容
+    memory_content = "\n".join(short_term_memory.get_recent()) if short_term_memory else ""
+    prompt = prompts['stepCheck'].format(data=data, step=step, image_info=image_info, memory_content=memory_content)
+    
     response = call_with_messages(prompt)
     print(response)
     if response:
         response_content = json.loads(response['output']['choices'][0]['message']['content'])
         result = response_content[0]['result']
         instruction = response_content[0]['instruction']
+        # 将问题和结果保存到短期记忆中
+        if short_term_memory:
+            short_term_memory.add(f"Prompt: {prompt}\nResult: {result}\nInstruction: {instruction}")
         return result, instruction
     else:
         return None, None

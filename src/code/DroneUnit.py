@@ -19,6 +19,9 @@ class DroneUnit(threading.Thread):
             'position': None,
             'velocity': None,
             'image': None,
+            'depth_image': None,
+            'camera_info': None,
+            'step': None,
             'other': None
         })
         self.task_executor = TaskExecutor()  # 使用单例模式的TaskExecutor实例

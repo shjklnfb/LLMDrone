@@ -2,10 +2,12 @@ from src.code.TaskPlanner import TaskPlanner
 from src.code.TaskExecutor import TaskExecutor
 from src.code.InterruptListener import InterruptListener
 from src.code.TaskAssigner import TaskAssigner
+import rospy
 
 # 主函数
 def main():
-    res = TaskPlanner().plan_task("无人机搜索居民楼楼顶的人员")
+    rospy.init_node('control_script', anonymous=True, disable_signals=True)
+    res = TaskPlanner().plan_task("无人机搜索红色房顶的加油站，侦查它的情况")
     res = TaskAssigner(None,None,res).task_with_drone()
     task_executor = TaskExecutor()
     for i in res:

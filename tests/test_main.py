@@ -345,6 +345,43 @@ class TestModule1(unittest.TestCase):
     def test_taskExecutor(self):
         from src.code.TaskExecutor import TaskExecutor
         from src.code.InterruptListener import InterruptListener
+        # subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
+        #     {
+        #     "name": "takeoff",
+        #     "description": "无人机垂直起飞到3m"
+        #     },
+        #     {
+        #     "name": "ascend",
+        #     "description": "飞行到一个没有障碍物的高度,至少20m"
+        #     },
+        #     {
+        #     "name": "search",
+        #     "description": "无人机寻找红色小汽车,当发现目标后，悬停在红色小汽车上空.如果没有找到，扩大搜索范围."
+        #     },
+        #     {
+        #     "name": "hover",
+        #     "description": "悬停在当前位置,持续一段时间"
+        #     },
+        #     {
+        #     "name": "land",
+        #     "description": "无人机降落到当前位置"
+        #     },
+           
+        # ])
+        # subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
+        #     {
+        #     "name": "takeoff",
+        #     "description": "无人机垂直起飞到3m"
+        #     },
+        #     {
+        #     "name": "ascend",
+        #     "description": "无人机从3m开始慢慢爬升，开始时可以一次爬升较高的高度，例如5m，后续需要减小爬升高度，一次1m,直到比房屋的高度高一段距离,确保在当前高度不会撞到房屋"
+        #     },
+        #     {
+        #     "name": "hover",
+        #     "description": "悬停在当前位置,持续一段时间"
+        #     },     
+        # ])
         subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
             {
             "name": "takeoff",
@@ -352,34 +389,13 @@ class TestModule1(unittest.TestCase):
             },
             {
             "name": "ascend",
-            "description": "飞行到一个没有障碍物的高度,至少20m"
-            },
-            {
-            "name": "search",
-            "description": "无人机在20m高度盘旋飞行，寻找红色房顶的加油站,当发现目标后，悬停在红色房顶的加油站上空.如果没有找到，扩大搜索范围.另外，在搜索的时间内，不再发布新的搜索指令"
+            "description": "无人机从3m开始慢慢爬升，不需要搜寻,开始时可以一次爬升较高的高度，例如5m，后续需要减小爬升高度，一次1m,直到看到红色小汽车"
             },
             {
             "name": "hover",
-            "description": "无人机悬停300秒"
-            },
-            # {
-            # "name": "ascend",
-            # "description": "无人机继续垂直攀升到20m"
-            # },
-            # {
-            # "name": "yaw",
-            # "description": "无人机环绕一圈，检查周围情况"
-            # },
-            # {
-            # "name": "search",
-            # "description": "无人机搜索居民楼,飞行到居民楼楼顶"
-            # },
-            # {
-            # "name": "land",
-            # "description": "无人机降落到原地"
-            # },
+            "description": "悬停在当前位置,持续一段时间"
+            },     
         ])
-
         task_executor = TaskExecutor()
         task_executor.add_subtask(subtask1)
 
@@ -389,6 +405,57 @@ class TestModule1(unittest.TestCase):
 
         task_executor.execute()
         rospy.spin()  # 保持ROS节点运行
+
+    # 19. 测试长短期记忆
+    # def test_memory(self):
+    #     from src.memory.ShortTermMemory import ShortTermMemory
+    #     from src.memory.LongTermMemory import LongTermMemory
+    #     # # 初始化短期记忆（保存最近3轮对话）
+    #     # st_mem = ShortTermMemory(max_size=3)
+    #     # st_mem.add("用户：请问你们有哪些支付方式？")
+    #     # st_mem.add("系统：我们支持支付宝、微信支付和银联")
+    #     # print("当前短期记忆：", st_mem.get_recent())
+
+    #     # 初始化长期记忆
+    #     lt_mem = LongTermMemory()
+    #     # 添加知识库数据
+    #     lt_mem.batch_add([
+    #         "退货政策：签收后7天内支持无理由退货",
+    #         "运费规则：订单满99元包邮，普通会员运费10元",
+    #         "会员等级：消费累计满500元升级为黄金会员",
+    #         "支付方式：支持支付宝、微信支付和银联",
+    #         "退款流程：退货后3个工作日内完成退款",
+    #         "如果您不满意商品，可以查看我们的退款退货政策"
+    #     ])
+
+    #     # 语义检索示例
+    #     results = lt_mem.search("如果我不满意商品怎么办？")
+    #     print("\n长期记忆检索结果：")
+    #     for score, knowledge in results:
+    #         print(f"[相似度{score:.3f}] {knowledge}")
+
+    # # 20. main
+    # def test_main(self):
+    #     from src.code.TaskPlanner import TaskPlanner
+    #     from src.code.TaskExecutor import TaskExecutor
+    #     from src.code.InterruptListener import InterruptListener
+    #     from src.code.TaskAssigner import TaskAssigner
+    #     from src.code.SimulationInitializer import SimulationInitializer 
+    #     res = TaskPlanner().plan_task("无人机搜索红色房顶的加油站，查看楼顶的情况,并且在楼顶降落")
+    #     res = TaskAssigner(None,None,res).task_with_drone()
+    #     drones = list(set(subtask.device for subtask in res))
+    #     SimulationInitializer.generate_init_file(drones,"outdoor1.world")
+    #     time.sleep(10)
+    #     import rospy
+    #     rospy.init_node('control_script', anonymous=True, disable_signals=True)
+    #     task_executor = TaskExecutor()
+    #     for i in res:
+    #         print(i)
+    #         task_executor.add_subtask(i)
+    #     interrupt_listener1 = InterruptListener(task_executor, 5000)
+    #     interrupt_listener1.start()
+    #     task_executor.execute()
+
 
 
 if __name__ == '__main__':

@@ -25,14 +25,14 @@ def call_with_messages(prompt):
         print("error")
 
 def log_response(response):
-    log_dir = 'log/task'
+    log_dir = '../log/task'
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log")
     with open(log_file, 'w', encoding='utf-8') as file:
         file.write(json.dumps(response, ensure_ascii=False, indent=4))
 
 def log_error(message):
-    log_dir = 'log/task'
+    log_dir = '../log/task'
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_error.log")
     with open(log_file, 'w', encoding='utf-8') as file:
@@ -40,10 +40,14 @@ def log_error(message):
 
 
 def generate_launch_file(drones, world_file):
+    # # 读取提示词
+    # with open('resources/prompt.yaml', 'r', encoding='utf-8') as file:
+    #     prompts = yaml.safe_load(file)
+    import os
     # 读取提示词
-    with open('resources/prompt.yaml', 'r', encoding='utf-8') as file:
+    prompt_path = os.path.expanduser('~/Desktop/LLMDrone/resources/prompt.yaml')
+    with open(prompt_path, 'r', encoding='utf-8') as file:
         prompts = yaml.safe_load(file)
-
     prompt = prompts['LaunchFile'].format(drones=drones, world_file=world_file)
     response = call_with_messages(prompt)
     log_response(response)

@@ -64,7 +64,7 @@ class TaskDecompose:
     def __init__(self):
         import os
         # 读取提示词
-        prompt_path = os.path.expanduser('~/Desktop/LLMDrone_2/resources/prompt.yaml')
+        prompt_path = os.path.expanduser('~/Desktop/LLMDrone/resources/prompt.yaml')
         with open(prompt_path, 'r', encoding='utf-8') as file:
             self.prompts = yaml.safe_load(file)
 

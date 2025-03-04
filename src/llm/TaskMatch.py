@@ -43,8 +43,13 @@ def choose_drone(subtasks):
     subtasks_dict = [subtask.to_dict() for subtask in subtasks]
     subtasks_json = json.dumps(subtasks_dict, ensure_ascii=False, indent=4)
     
+    # # 读取提示词
+    # with open('resources/prompt.yaml', 'r', encoding='utf-8') as file:
+    #     prompts = yaml.safe_load(file)
+    import os
     # 读取提示词
-    with open('resources/prompt.yaml', 'r', encoding='utf-8') as file:
+    prompt_path = os.path.expanduser('~/Desktop/LLMDrone/resources/prompt.yaml')
+    with open(prompt_path, 'r', encoding='utf-8') as file:
         prompts = yaml.safe_load(file)
     
     # 格式化提示词

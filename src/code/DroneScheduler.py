@@ -30,6 +30,10 @@ class DroneScheduler(threading.Thread):
                 drone_executor = DroneExecutor(self.drone_id, step, self.shared_data)
                 drone_executor.start()
                 drone_executor.join()  # 等待步骤执行完成
+                
+                # 更新步骤到 shared_data
+                self.shared_data[self.drone_id]['step'] = step
+                
                 if self.step_queue.empty() or self.step_queue.queue[0][0] != subtask:
                     self.notify_task_completion(subtask)
             time.sleep(1)
@@ -60,6 +64,10 @@ class DroneScheduler(threading.Thread):
                 drone_executor = DroneExecutor(self.drone_id, step, self.shared_data)
                 drone_executor.start()
                 drone_executor.join()
+                
+                # 更新步骤到 shared_data
+                self.shared_data[self.drone_id]['step'] = step
+                
             self.notify_task_completion(emergency_task)
         
         # 恢复之前的子任务和步骤队列
