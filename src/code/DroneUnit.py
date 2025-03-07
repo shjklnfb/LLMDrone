@@ -11,10 +11,7 @@ from src.code.DroneScheduler import DroneScheduler
 class DroneUnit(threading.Thread):
     _lock = threading.Lock()
 
-    def __init__(self, drone_id):
-        super().__init__()
-        self.drone_id = drone_id
-        self.shared_data = defaultdict(lambda: {
+    shared_data = defaultdict(lambda: {
             'state': None,
             'position': None,
             'velocity': None,
@@ -24,6 +21,11 @@ class DroneUnit(threading.Thread):
             'step': None,
             'other': None
         })
+
+    def __init__(self, drone_id):
+        super().__init__()
+        self.drone_id = drone_id
+       
         self.task_executor = TaskExecutor()  # 使用单例模式的TaskExecutor实例
 
         self.monitor = DroneMonitor(self.drone_id, self.shared_data)

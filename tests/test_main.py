@@ -368,6 +368,22 @@ class TestModule1(unittest.TestCase):
         #     },
            
         # ])
+    
+        subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
+            {
+            "name": "takeoff",
+            "description": "无人机垂直起飞到15m"
+            },
+            {
+            "name": "ascend",
+            "description": "无人机从15m开始慢慢爬升，不需要搜寻(command_search),开始时可以一次爬升较高的高度，例如5m，后续需要减小每次的爬升高度，例如一次1m,看到小轿车时即满足目标"
+            },
+            {
+            "name": "hover",
+            "description": "无人机降落,注:无人机处于auto.land模式，且高度小于1m的时候表示已经降落完成.不需要确保降落完成，不需要重新发送降落指令"
+            },     
+        ])
+
         # subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
         #     {
         #     "name": "takeoff",
@@ -378,26 +394,27 @@ class TestModule1(unittest.TestCase):
         #     "description": "无人机从3m开始慢慢爬升，开始时可以一次爬升较高的高度，例如5m，后续需要减小爬升高度，一次1m,直到比房屋的高度高一段距离,确保在当前高度不会撞到房屋"
         #     },
         #     {
-        #     "name": "hover",
-        #     "description": "悬停在当前位置,持续一段时间"
-        #     },     
+        #     "name": "search",
+        #     "description": "无人机在当前高度随机飞行，寻找一辆汽车，最多飞行10min，如果找到，无人机返回起飞点，达到最大时间没有找到时也返回起飞点"
+        #     }, 
         # ])
-        subtask1 = SubTask(task_id=1, name="subtask1", priority=5, dep_id=[], is_interrupt=0, device="iris_0", instructions=[
+        subtask2 = SubTask(task_id=2, name="subtask2", priority=5, dep_id=[1], is_interrupt=0, device="typhoon_h480_1", instructions=[
             {
             "name": "takeoff",
             "description": "无人机垂直起飞到3m"
             },
             {
-            "name": "ascend",
-            "description": "无人机从3m开始慢慢爬升，不需要搜寻,开始时可以一次爬升较高的高度，例如5m，后续需要减小爬升高度，一次1m,直到看到红色小汽车"
+            "name": "fly_to",
+            "description": "无人机上升5m,然后飞行到小轿车所在的位置，注意这个位置是其他无人机确定的，你需要先给一个暂时的保守位置，等待接受确切的位置。"
             },
             {
             "name": "hover",
-            "description": "悬停在当前位置,持续一段时间"
-            },     
+            "description": "无人机在当前位置悬停"
+            },
         ])
         task_executor = TaskExecutor()
         task_executor.add_subtask(subtask1)
+        task_executor.add_subtask(subtask2)
 
         interrupt_listener1 = InterruptListener(task_executor, 5000)
 

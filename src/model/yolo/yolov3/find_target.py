@@ -9,13 +9,17 @@ import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Imu
-
+import os
 # # 初始化ROS节点
 # rospy.init_node('offboard_ctr')
 
 # 加载YOLOv3 Tiny模型
-net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg")
-with open("coco.names", "r") as f:
+cfg_path = os.path.expanduser("~/Desktop/LLMDrone/src/model/yolo/yolov3/yolov3-tiny.cfg")
+weights_path = os.path.expanduser("~/Desktop/LLMDrone/src/model/yolo/yolov3/yolov3-tiny.weights")
+coco_path = os.path.expanduser("~/Desktop/LLMDrone/src/model/yolo/yolov3/coco.names")
+
+net = cv2.dnn.readNet(weights_path, cfg_path)
+with open(coco_path, "r") as f:
     classes = [line.strip() for line in f.readlines()]
 
 layer_names = net.getLayerNames()
@@ -88,7 +92,7 @@ def image_callback(msg):
     result_pub.publish(result_str)
 
 # 图像订阅
-image_sub = rospy.Subscriber('/iris_0/camera/image_raw', Image, image_callback)
+image_sub = rospy.Subscriber('/iris_0/realsense/depth_camera/color/image_raw', Image, image_callback)
 
 # 标注图像的发布
 annotated_image_pub = rospy.Publisher('/annotated_image', Image, queue_size=10)

@@ -10,7 +10,6 @@ from src.instructions.command_search import publish_random_flight_command as com
 from src.instructions.command_hover import send_hover_command as command_hover
 from src.instructions.command_land import send_land_command as command_land
 from src.llm.ImageRecognition import analyze_image,analyze_depth_image
-from src.model.depth import calculate_camera_height
 from src.memory.ShortTermMemory import ShortTermMemory
 # 无人机执行器类
 # 将步骤翻译为无人机指令并执行，判断步骤的执行情况，根据步骤的执行情况发布新的指令
@@ -33,8 +32,7 @@ class DroneExecutor(threading.Thread):
         current_state = {k: v for k, v in self.shared_data.get(self.drone_id, {}).items() if k not in ['image', 'depth_image', 'camera_info']}
         # 图像处理
         image_info = analyze_image(self.shared_data[self.drone_id].get('image', {}),step=self.step)
-        a = calculate_camera_height(self.shared_data[self.drone_id].get('depth_image', {}),self.shared_data[self.drone_id].get('camera_info', {})) 
-        print(a)
+
         # 根据当前状态检查步骤是否完成
         res, instruction = checkStep(current_state, self.step, image_info, self.short_term_memory)
         # 如果步骤没有完成，继续执行
@@ -43,8 +41,7 @@ class DroneExecutor(threading.Thread):
             self.wait_for_command_execution()
             current_state = {k: v for k, v in self.shared_data.get(self.drone_id, {}).items() if k not in ['image', 'depth_image', 'camera_info']}
             image_info = analyze_image(self.shared_data[self.drone_id].get('image', {}),step=self.step)
-            # a = calculate_camera_height(self.shared_data[self.drone_id].get('depth_image', {}),self.shared_data[self.drone_id].get('camera_info', {})) 
-            # print(a)
+ 
             res, instruction = checkStep(current_state, self.step, image_info, self.short_term_memory)
         time.sleep(1)
 

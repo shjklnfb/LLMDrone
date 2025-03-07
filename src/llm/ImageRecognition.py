@@ -13,6 +13,9 @@ from sensor_msgs.msg import Image
 
 # 将 ROS 的 sensor_msgs/Image 转换为 Base64 编码的图像数据
 def image_msg_to_base64(image_msg):
+    if image_msg is None:
+        return None
+
     bridge = CvBridge()
     # 将 ROS 图像消息转换为 OpenCV 格式
     if image_msg.encoding == '32FC1':
@@ -27,6 +30,9 @@ def image_msg_to_base64(image_msg):
 
 # 图像分析方法
 def analyze_image(image_msg, additional_image_msg=None, step=""):
+    if image_msg is None:
+        return None
+
     # 将 ROS 图像消息转换为 Base64 编码
     base64_image = image_msg_to_base64(image_msg)
     
